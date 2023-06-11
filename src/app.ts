@@ -58,7 +58,6 @@ app.get('/channels', async (req: Request, res: Response) => {
 // });
 app.get('/epg/:id', async (req: Request, res: Response) => {
     let id: string = ` ${req.params.id}`
-    // console.log(id)
     /** Aufbau eines EPG-Eintrags
      *  C <channelID> <KanalName>	Beginn eines neuen Kanals
         E <EventID> <StartZeit> <Dauer> <TableID> <Version>	Beginn eines neuen Eintrags
@@ -82,8 +81,6 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
     let itemCount = 0
     while (iterationCounter < data.length - 1) {
         let epgLine: string = data[iterationCounter]
-        // console.log(`iterationCounter in first loop: ${iterationCounter}`)
-        // console.log(`first epgLine: ${epgLine}`)
         // new channel
         if (epgLine.startsWith(EPG_CHANNEL_PREFIX)) {
          
@@ -95,15 +92,12 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
             iterationCounter++
             // find all details for the channel
             while (!epgLine.startsWith('215-c ') && iterationCounter < data.length - 1) {
-                // console.log(`iterationCounter in second loop: ${iterationCounter}`)
                 // find all details for every single epg-entry
                 // iterationCounter++
                 epgLine = data[iterationCounter]
                 let epgEntry = {} as epgJson.epgEntry
                 while (!(epgLine === '') && !epgLine.startsWith('215-e') && iterationCounter < data.length - 1) {
-                    // console.log(`iterationCounter in third loop: ${iterationCounter}`)
                     epgLine = data[iterationCounter]
-                    // console.log(`currentline: ${epgLine}`)
                     if (epgLine.startsWith('215-E')) {
                         epgEntry.startZeit = epgLine.replace('215-E ', '')
                         let startTimeDate = new Date(parseInt(epgLine.split(' ')[2]) * 1000)
@@ -150,14 +144,10 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
             jsonEpg.push(newChannel)
         }
     }
-
-    // console.log(`Data from Socket: ${data}`)
-    // console.log(`jsonEpg created: ${jsonEpg}`)
     res.status(200).json({data: jsonEpg})
 });
 app.get('/recordings', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTR')
-    // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
 app.delete('/timers/:id', async (req: Request, res: Response) => {
@@ -173,7 +163,8 @@ app.delete('/timers/:id', async (req: Request, res: Response) => {
 app.get('/timers', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTT')
     let resData: Array<epgJson.jsonTimerDetails> = []
-    if (data.length > 1) {
+    console.log(data)
+    if (data.length > 1 && data[0] !== '550 No timers defined') {
         data.forEach( function (timer: string) {
             let timerDetails: string[] = timer.split(':')
             let jsonTimerDetails = {} as epgJson.jsonTimerDetails
@@ -186,7 +177,6 @@ app.get('/timers', async (req: Request, res: Response) => {
                     endzeit: `${timerDetails[4].slice(0,2)}:${timerDetails[4].slice(2)}`,
                     titel: timerDetails[7],
                 }
-                console.log(jsonTimerDetails)
             }
             resData.push(jsonTimerDetails)
         })
@@ -204,7 +194,6 @@ app.post('/timers', async (req: Request, res: Response) => {
     else {
         res.status(400).json({data: data})
     }
-    
 });
 
 app.listen(process.env.PORT, (): void => {
