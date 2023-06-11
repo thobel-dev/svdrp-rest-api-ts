@@ -21,26 +21,41 @@ app.get('/', async (req: Request, res: Response) => {
     res.status(200).json({data: data})
 });
 app.get('/channels', async (req: Request, res: Response) => {
+    const channelDetailsSeparator: RegExp = /([\:\;\,])/g
+    const channelSeparator: RegExp = /([^\d]+)/g
+    let resData: Array<epgJson.jsonChannelDetails> = []
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
-    // console.log(`Data from Socket: ${data}`)
-    res.status(200).json({data: data})
-});
-app.get('/channels/:name', async (req: Request, res: Response) => {
-    let channelsDetails: string[][] = []
-    let channelName: string = req.params.name
-    let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
-    let possibleChannels: string[] = data.filter((item: string) => {
-        return item.toLowerCase().indexOf(channelName.toLowerCase()) > -1
+    data.forEach(function (channel: string) {
+        if (channel !== '') {
+            let channelDetail: epgJson.jsonChannelDetails = {} as epgJson.jsonChannelDetails
+            let channelDetails: string[] = channel.split(channelDetailsSeparator)
+            let channelIdAndName: string = channelDetails[0].substring(4,channelDetails[0].length)
+            let channelIdArray: string[] = channelIdAndName.split(channelSeparator)
+            console.log(channelIdArray)
+            channelDetail.id = parseInt(channelIdArray[0])
+            channelDetail.channelname = channelIdArray.slice(1, channelIdArray.length - 1).join('')
+            channelDetail.channelDetails = channel
+            resData.push(channelDetail)
+        }        
     })
-    const separator: RegExp = /([\:\;])/g
-    possibleChannels.forEach(channel => {
-        let channelDetails: string[] = channel.split(separator)
-        channelsDetails.push(channelDetails)
-    });
-    
-    // console.log(channelDetails)
-    res.status(200).json({data: channelsDetails})
+    res.status(200).json({data: resData})
 });
+// app.get('/channels/:name', async (req: Request, res: Response) => {
+//     let channelsDetails: string[][] = []
+//     let channelName: string = req.params.name
+//     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
+//     let possibleChannels: string[] = data.filter((item: string) => {
+//         return item.toLowerCase().indexOf(channelName.toLowerCase()) > -1
+//     })
+//     const separator: RegExp = /([\:\;])/g
+//     possibleChannels.forEach(channel => {
+//         let channelDetails: string[] = channel.split(separator)
+//         channelsDetails.push(channelDetails)
+//     });
+    
+//     // console.log(channelDetails)
+//     res.status(200).json({data: channelsDetails})
+// });
 app.get('/epg/:id', async (req: Request, res: Response) => {
     let id: string = ` ${req.params.id}`
     // console.log(id)

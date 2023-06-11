@@ -27,3 +27,9 @@ export type jsonTimerDetails = {
     endzeit: string,
     titel: string,
 }
+
+export type jsonChannelDetails = {
+    id: number,
+    channelname: string,
+    channelDetails: string
+}
