@@ -1,10 +1,8 @@
-import * as net from 'net'
+
 import * as dotenv from 'dotenv'
 import express, { Application, Request, Response } from 'express'
 import * as svdrp from './svdrp'
-// import { json } from 'stream/consumers';
 import * as epgJson from './types/epgJson'
-import { start } from 'repl'
 
 const app: Application = express();
 // use .env-file
@@ -14,19 +12,20 @@ const PORT = process.env.SVDRP_PORT
 const HOST = process.env.SVDRP_HOST
 const EPG_CHANNEL_PREFIX = '215-C '
 let svdrpBackend = new svdrp.default()
+app.use(express.json())
 
 
-app.get('/', async (req:any, res:any) => {
+app.get('/', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'HELP')
     // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
-app.get('/channels', async (req:any, res:any) => {
+app.get('/channels', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
     // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
-app.get('/channels/:name', async (req:any, res:any) => {
+app.get('/channels/:name', async (req: Request, res: Response) => {
     let channelsDetails: string[][] = []
     let channelName: string = req.params.name
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
@@ -42,7 +41,7 @@ app.get('/channels/:name', async (req:any, res:any) => {
     // console.log(channelDetails)
     res.status(200).json({data: channelsDetails})
 });
-app.get('/epg/:id', async (req:any, res:any) => {
+app.get('/epg/:id', async (req: Request, res: Response) => {
     let id: string = ` ${req.params.id}`
     // console.log(id)
     /** Aufbau eines EPG-Eintrags
@@ -155,20 +154,38 @@ app.get('/epg/:id', async (req:any, res:any) => {
     // console.log(`jsonEpg created: ${jsonEpg}`)
     res.status(200).json({data: jsonEpg})
 });
-app.get('/recordings', async (req:any, res:any) => {
+app.get('/recordings', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTR')
     // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
-app.get('/timers', async (req:any, res:any) => {
+app.delete('/timers/:id', async (req: Request, res: Response) => {
+    let id: number = parseInt(req.params.id)
+    let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, `DELT ${id}`)
+    if (data[0].toString().startsWith('250')) {
+        res.status(200).json({data: data})
+    }
+    else {
+        res.status(400).json({data: data})
+    }
+});
+app.get('/timers', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTT')
     // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
-app.post('/timers', async (req:any, res:any) => {
-    let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'NEWT')
-    // console.log(`Data from Socket: ${data}`)
-    res.status(200).json({data: data})
+app.post('/timers', async (req: Request, res: Response) => {
+    let timerDetails: string = req.body.timerDetails
+    console.log(`timer details: ${timerDetails}`)
+    let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, `NEWT ${timerDetails}`)
+    console.log(`Data from Socket: ${data}`)
+    if (data[0].toString().startsWith('250')) {
+        res.status(200).json({data: data})
+    }
+    else {
+        res.status(400).json({data: data})
+    }
+    
 });
 
 app.listen(process.env.PORT, (): void => {
