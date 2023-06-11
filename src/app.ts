@@ -110,7 +110,7 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
                         let dateTimeParts: string[] = epgEntry.startZeitH.split(', ')
                         let dateParts: string[] = dateTimeParts[0].split('.')
                         let timeParts: string[] = dateTimeParts[1].split(':')
-                        epgEntry.startDatumTimer = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`
+                        epgEntry.startDatumTimer = `${dateParts[2]}-${(0+dateParts[1]).slice(-2)}-${(0+dateParts[0]).slice(-2)}`
                         epgEntry.startZeitTimer = `${timeParts[0]}${timeParts[1]}`
                         startTimeDate.setSeconds(startTimeDate.getSeconds() + parseInt(epgLine.split(' ')[3]))
                         epgEntry.endZeit = startTimeDate.toLocaleString()
@@ -171,14 +171,32 @@ app.delete('/timers/:id', async (req: Request, res: Response) => {
 });
 app.get('/timers', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTT')
-    // console.log(`Data from Socket: ${data}`)
-    res.status(200).json({data: data})
+    let resData: Array<epgJson.jsonTimerDetails> = []
+    if (data.length > 1) {
+        data.forEach( function (timer: string) {
+            let timerDetails: string[] = timer.split(':')
+            let jsonTimerDetails = {} as epgJson.jsonTimerDetails
+            if (timerDetails.length > 1) {
+                jsonTimerDetails = {
+                    id: parseInt(timerDetails[0].replace('-', ' ').split(' ')[1]),
+                    channelId: timerDetails[1],
+                    startdatum: timerDetails[2],
+                    startzeit: `${timerDetails[3].slice(0,2)}:${timerDetails[3].slice(2)}`,
+                    endzeit: `${timerDetails[4].slice(0,2)}:${timerDetails[4].slice(2)}`,
+                    titel: timerDetails[7],
+                }
+                console.log(jsonTimerDetails)
+            }
+            resData.push(jsonTimerDetails)
+        })
+    }
+    res.status(200).json({data: resData})
 });
 app.post('/timers', async (req: Request, res: Response) => {
     let timerDetails: string = req.body.timerDetails
     console.log(`timer details: ${timerDetails}`)
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, `NEWT ${timerDetails}`)
-    console.log(`Data from Socket: ${data}`)
+    // console.log(`Data from Socket: ${data}`)
     if (data[0].toString().startsWith('250')) {
         res.status(200).json({data: data})
     }

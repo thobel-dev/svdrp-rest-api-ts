@@ -18,3 +18,12 @@ export type epgEntry = {
     startZeitTimer: string,
     titel: string,
 }
+
+export type jsonTimerDetails = {
+    id: number,
+    channelId: string,
+    startdatum: string,
+    startzeit: string,
+    endzeit: string,
+    titel: string,
+}
