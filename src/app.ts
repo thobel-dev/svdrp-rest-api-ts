@@ -84,22 +84,8 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
                 // find all details for every single epg-entry
                 // iterationCounter++
                 epgLine = data[iterationCounter]
-                let epgEntry: epgJson.epgEntry = {
-                    beschreibung: '',
-                    endZeit: '',
-                    endZeitTimer: '',
-                    genre: '',
-                    jugendfreigabe: '',
-                    kurztext: '',
-                    mediendetails: '',
-                    startDatumTimer: '',
-                    startZeit: '',
-                    startZeitH: '',
-                    startZeitTimer: '',
-                    titel: '',
-            
-                }
-                while (!epgLine.startsWith('215-e') && iterationCounter < data.length - 1) {
+                let epgEntry = {} as epgJson.epgEntry
+                while (!(epgLine === '') && !epgLine.startsWith('215-e') && iterationCounter < data.length - 1) {
                     // console.log(`iterationCounter in third loop: ${iterationCounter}`)
                     epgLine = data[iterationCounter]
                     // console.log(`currentline: ${epgLine}`)
@@ -140,9 +126,9 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
                     iterationCounter++;
                 }
                 itemCount++
-                if (epgEntry.startZeit !== '') {
+                
+                if (epgEntry.startZeit && epgEntry.startZeit !== '') {
                     let copyOfEpgEntry = JSON.parse(JSON.stringify(epgEntry))
-                    // console.log(`new entry: ${copyOfEpgEntry} with itemCount ${itemCount}`)
                     newChannel.epgEntries.push(copyOfEpgEntry)
                 }
             }
