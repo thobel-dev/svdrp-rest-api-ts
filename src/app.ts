@@ -260,8 +260,10 @@ app.get('/timers', async (req: Request, res: Response) => {
                     id: parseInt(timerDetails[0].replace('-', ' ').split(' ')[1]),
                     channelId: timerDetails[1],
                     startdatum: timerDetails[2],
-                    startzeit: `${timerDetails[3].slice(0,2)}:${timerDetails[3].slice(2)}`,
-                    endzeit: `${timerDetails[4].slice(0,2)}:${timerDetails[4].slice(2)}`,
+                    startzeitH: `${timerDetails[3].slice(0,2)}:${timerDetails[3].slice(2)}`,
+                    endzeitH: `${timerDetails[4].slice(0,2)}:${timerDetails[4].slice(2)}`,
+                    startzeit: timerDetails[3],
+                    endzeit: timerDetails[4],
                     titel: timerDetails[7],
                 }
             }
