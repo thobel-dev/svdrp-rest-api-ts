@@ -1,5 +1,5 @@
 export type epgChannelJson = {
-    channelId: number,
+    channelId: string,
     name: string,
     epgEntries: epgEntry[]
 }
