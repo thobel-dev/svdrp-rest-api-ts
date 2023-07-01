@@ -17,7 +17,6 @@ app.use(express.json())
 
 app.get('/', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'HELP')
-    // console.log(`Data from Socket: ${data}`)
     res.status(200).json({data: data})
 });
 app.get('/channels', async (req: Request, res: Response) => {
@@ -40,22 +39,6 @@ app.get('/channels', async (req: Request, res: Response) => {
     })
     res.status(200).json({data: resData})
 });
-// app.get('/channels/:name', async (req: Request, res: Response) => {
-//     let channelsDetails: string[][] = []
-//     let channelName: string = req.params.name
-//     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTC')
-//     let possibleChannels: string[] = data.filter((item: string) => {
-//         return item.toLowerCase().indexOf(channelName.toLowerCase()) > -1
-//     })
-//     const separator: RegExp = /([\:\;])/g
-//     possibleChannels.forEach(channel => {
-//         let channelDetails: string[] = channel.split(separator)
-//         channelsDetails.push(channelDetails)
-//     });
-    
-//     // console.log(channelDetails)
-//     res.status(200).json({data: channelsDetails})
-// });
 app.get('/epg/:id', async (req: Request, res: Response) => {
     let id: string = ` ${req.params.id}`
     /** Aufbau eines EPG-Eintrags
