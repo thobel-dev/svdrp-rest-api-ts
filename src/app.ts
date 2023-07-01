@@ -210,7 +210,32 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
 });
 app.get('/recordings', async (req: Request, res: Response) => {
     let data: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, 'LSTR')
-    res.status(200).json({data: data})
+    // 250 2 08.03.07 20:00 0:15* Tagesschau
+    /**
+     * 2 ist die Nummer der Aufnahme. Danach folgt Datum und Uhrzeit der Aufnahme, danach die Aufnahmedauer.
+     * Der Stern hinter der Uhrzeit zeigt an, dass die Aufnahme neu ist. Als Letztes folgt der Titel der aufgenommenen Sendung.
+     */
+    let jsonRecording: any = []
+    for (let i = 0; i < data.length - 1; i++) {
+        let recording = data[i]
+        let recordingDetails = recording.replace('250-','').replace('250 ','').split(' ')
+        let title: string = recordingDetails[4]
+        for (let i = 5; i < recordingDetails.length; i++) {
+            title += ` ${recordingDetails[i]}`            
+        }
+        let currentRecording: epgJson.jsonRecording = {
+            id: parseInt(recordingDetails[0]),
+            datum: recordingDetails[1],
+            zeit: recordingDetails[2],
+            dauer: recordingDetails[3].indexOf('*') > -1 ? recordingDetails[3].substring(0, recordingDetails[3].length - 1) : recordingDetails[3],
+            neu: recordingDetails[3].indexOf('*') > -1 ? true : false,
+            titel: title
+
+        }
+        let addCurrentRecording = JSON.parse(JSON.stringify(currentRecording))
+        jsonRecording.push(addCurrentRecording)
+    }
+    res.status(200).json({data: jsonRecording})
 });
 app.delete('/timers/:id', async (req: Request, res: Response) => {
     let id: number = parseInt(req.params.id)

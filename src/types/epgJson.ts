@@ -33,3 +33,12 @@ export type jsonChannelDetails = {
     channelname: string,
     channelDetails: string
 }
+
+export type jsonRecording = {
+    id: number,
+    datum: string,
+    zeit: string,
+    dauer: string,
+    neu: boolean,
+    titel: string
+}
