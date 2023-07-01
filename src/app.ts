@@ -30,7 +30,6 @@ app.get('/channels', async (req: Request, res: Response) => {
             let channelDetails: string[] = channel.split(channelDetailsSeparator)
             let channelIdAndName: string = channelDetails[0].substring(4,channelDetails[0].length)
             let channelIdArray: string[] = channelIdAndName.split(channelSeparator)
-            console.log(channelIdArray)
             channelDetail.id = parseInt(channelIdArray[0])
             channelDetail.channelname = channelIdArray.slice(1, channelIdArray.length - 1).join('')
             channelDetail.channelDetails = channel
@@ -58,10 +57,6 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
     let epgData: any = await svdrpBackend.querySvdrp(parseInt(PORT!), HOST!, `LSTE${id}`)
     // epg has different line break, so prepare for further transformation
     let data: string[] = epgData[0].split('\n')
-    // console.log(`Type von data: ${typeof(data)} mit ${data.length} Elementen`)
-    // build epg-json from string-array - interationCounter has to be used inside loop itself
-    // let iterationCounter: number = 0
-    // let itemCount = 0
     
     let epgEntry = {} as epgJson.epgEntry
     let newChannel = {} as epgJson.epgChannelJson
@@ -123,72 +118,6 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
         }
     });
 
-    // let epgLine: string = ''
-    // while (iterationCounter < data.length - 1) {
-    //     epgLine = data[iterationCounter]
-    //     // new channel
-    //     if (epgLine.startsWith(EPG_CHANNEL_PREFIX)) {
-    //         console.log(`New channel: ${epgLine}`)
-    //         let newChannel: epgJson.epgChannelJson = {
-    //             name: epgLine.replace(EPG_CHANNEL_PREFIX, ''),
-    //             channelId: parseInt(id),
-    //             epgEntries: []
-    //         }
-    //         iterationCounter++
-    //         // find all details for the channel
-    //         while (!epgLine.startsWith('215-c') && iterationCounter < data.length - 1) {
-    //             // find all details for every single epg-entry
-    //             epgLine = data[iterationCounter]
-    //             console.log(`current line ${epgLine}`)
-    //             let epgEntry = {} as epgJson.epgEntry
-    //             while (!(epgLine === '') && !epgLine.startsWith('215-e') && !epgLine.startsWith('215-e') && iterationCounter < data.length - 1) {
-    //                 epgLine = data[iterationCounter]
-    //                 if (epgLine.startsWith('215-E')) {
-    //                     epgEntry.startZeit = epgLine.replace('215-E ', '')
-    //                     let startTimeDate = new Date(parseInt(epgLine.split(' ')[2]) * 1000)
-    //                     epgEntry.startZeitH = startTimeDate.toLocaleString()
-    //                     let dateTimeParts: string[] = epgEntry.startZeitH.split(', ')
-    //                     let dateParts: string[] = dateTimeParts[0].split('.')
-    //                     let timeParts: string[] = dateTimeParts[1].split(':')
-    //                     epgEntry.startDatumTimer = `${dateParts[2]}-${(0+dateParts[1]).slice(-2)}-${(0+dateParts[0]).slice(-2)}`
-    //                     epgEntry.startZeitTimer = `${timeParts[0]}${timeParts[1]}`
-    //                     startTimeDate.setSeconds(startTimeDate.getSeconds() + parseInt(epgLine.split(' ')[3]))
-    //                     epgEntry.endZeit = startTimeDate.toLocaleString()
-    //                     let endZeitDateTimeParts = epgEntry.endZeit.split(', ')
-    //                     let endZeitDateParts = endZeitDateTimeParts[0].split('.')
-    //                     let endZeitTimeParts = endZeitDateTimeParts[1].split(':')
-    //                     epgEntry.endZeitTimer = `${endZeitTimeParts[0]}${endZeitTimeParts[1]}` 
-    //                 }
-    //                 if (epgLine.startsWith('215-T')) {
-    //                     epgEntry.titel = epgLine.replace('215-T ', '')
-    //                 }
-    //                 if (epgLine.startsWith('215-S')) {
-    //                     epgEntry.kurztext = epgLine.replace('215-S ', '')
-    //                 }
-    //                 if (epgLine.startsWith('215-D')) {
-    //                     epgEntry.beschreibung = epgLine.replace('215-D ', '')
-    //                 }
-    //                 if (epgLine.startsWith('215-G')) {
-    //                     epgEntry.genre = epgLine.replace('215-G ', '')
-    //                 }
-    //                 if (epgLine.startsWith('215-R')) {
-    //                     epgEntry.jugendfreigabe = epgLine.replace('215-R ', '')
-    //                 }
-    //                 if (epgLine.startsWith('215-X')) {
-    //                     epgEntry.mediendetails = epgLine.replace('215-X ', '')
-    //                 }
-    //                 iterationCounter++;
-    //             }
-    //             itemCount++
-                
-    //             if (epgEntry.startZeit && epgEntry.startZeit !== '') {
-    //                 let copyOfEpgEntry = JSON.parse(JSON.stringify(epgEntry))
-    //                 newChannel.epgEntries.push(copyOfEpgEntry)
-    //             }
-    //         }
-    //         jsonEpg.push(newChannel)
-    //     }
-    // }
     res.status(200).json({data: jsonEpg})
 });
 app.get('/recordings', async (req: Request, res: Response) => {
