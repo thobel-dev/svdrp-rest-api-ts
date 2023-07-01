@@ -72,7 +72,7 @@ app.get('/epg/:id', async (req: Request, res: Response) => {
         }
 
         // channel end
-        if (epgLine.startsWith('215-c')) {
+        if (epgLine.startsWith('215-c') && (newChannel.epgEntries.length > 0)) {
             let copyOfNewChannel = JSON.parse(JSON.stringify(newChannel))
             jsonEpg.push(copyOfNewChannel)
         }
